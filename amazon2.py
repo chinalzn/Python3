@@ -33,16 +33,16 @@ def GetOriginThreadUrl(html):
     return None
 
 def GetOriginPostAt(html):
-    detail = html.xpath('//*[@id="title"]/span[3]/text()')[0]
+    detail = html.xpath('//*[@id="title"]/span[3]/text()')
     if detail:
-        return detail
+        return detail[0][2:]
     else:
         return None
 
 def GetOriginDealPrice(html):
-    detail = html.xpath('//*[@id="a-autoid-3-announce"]/span[2]/span/text()')[0]
+    detail = html.xpath('//*[@class="a-fixed-right-grid-col a-col-left"]/span/text()')
     if detail:
-        return detail
+        return detail[0]
     else:
         return None
 
@@ -51,16 +51,16 @@ def GetOriginDealPrice(html):
 #     return detail
 
 def GetTitle(html):
-    detail = html.xpath('//*[@id="productTitle"]/text()')[0]
+    detail = html.xpath('//*[@id="productTitle"]/text()')
     if detail:
-        return detail
+        return detail[0]
     else:
         return None
 
 def GetMainImage(html):
-    detail = html.xpath('//*[@id="imgBlkFront"]/@src')[0]
+    detail = html.xpath('//*[@id="imgBlkFront"]/@src')
     if detail:
-        return detail
+        return detail[0]
     else:
         return None
 
@@ -69,9 +69,9 @@ def GetStore(html):
     return None
 
 def GetDescription(html):
-    detail = html.xpath('//*[@id="iframeContent"]/p/text()')[0]
+    detail = html.xpath('//*[@id="iframeContent"]/p/text()')
     if detail:
-        return detail
+        return detail[0]
     else:
         return None
 
@@ -83,6 +83,7 @@ def GetCrawlDate(html):
     return datetime.datetime.now()
 
 def GetItemDetail(ItemPageUrl, html, html1):
+    # print html
     ItemInfo = ItemDetail()
     ItemInfo.origin = GetOrigin(html)
     ItemInfo.origin_thread_id = GetOriginThreadId(html)
@@ -123,16 +124,13 @@ class Slick:
     def GetItemsUrl(self):
         if self.PresencePage:
             urls = self.GetItemInfo()
-            Num = 0
             links = []
             for url in urls:
                 html = etree.HTML(str(url))
                 xpath = '//*[@class="zg_itemImmersion"]/div[2]/div[2]/a/@href'
                 link = html.xpath(xpath)
-                links.append(link)
-                Num = Num + 1
-                print Num
-                print '\n'
+                if link:
+                    links.append(link[0][7:])
             return links
 
     def DealWithItems(self):
@@ -140,18 +138,19 @@ class Slick:
             ItemsUrls = self.GetItemsUrl()
             for url in ItemsUrls:
                 ItemPageUrl = url
+                # print ItemPageUrl
                 try:
                     res = urllib2.urlopen(ItemPageUrl).read()
+                except:
+                    print "GetInfoWrong"
+                else:
                     soup = BeautifulSoup(res, 'html.parser')
-                    soup1 = BeautifulSoup(res, 'html.pasrser')
-                    soups = soup.find_all('div', attrs = {'centerCol'})
-                    soups1 = soup1.find_all('div', attrs = {'leftCol'})
+                    soups = soup.find_all('div', attrs = {'id' : 'centerCol'})
+                    soups1 = soup.find_all('div', attrs = {'id' : 'leftCol'})
                     html = etree.HTML(str(soups))
                     html1 = etree.HTML(str(soups1))
                     info = GetItemDetail(ItemPageUrl, html, html1)
                     self.handler(info)
-                except:
-                    pass
 
     def crawl(self):
         self.GetPageUrl()
@@ -170,7 +169,7 @@ if __name__ == '__main__':
     #         print "\n"
     #         print '-' * 60
     def handler(info):
-        print info.main_image
+        print info.origin_post_at
 
     slick = Slick(url = 'http://www.amazon.com/best-sellers-books-Amazon/zgbs/books/ref=zg_bs_books_pg_2?_encoding=UTF8&pg=', handler = handler)
     slick.crawl()

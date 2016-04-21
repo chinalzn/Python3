@@ -11,19 +11,19 @@ s = soup.find('div', attrs = {'class' : 'zg_itemImmersion'})
 
 selector = etree.HTML(str(s))
 xpath = '//*[@class="zg_itemImmersion"]/div[2]/div[2]/a/@href'
-aa = selector.xpath(xpath)
+aa = selector.xpath(xpath)[0][7:]
 
-# print aa[0]
-# urlnew = urllib2.urlopen(aa[0]).read()
-aa = 'http://www.amazon.com/Hamilton-The-Revolution-Lin-Manuel-Miranda/dp/1455539740/ref=zg_bs_books_2'
-urlnew = urllib2.urlopen(aa).read()
-soup = BeautifulSoup(urlnew, 'html.parser')
-s = soup.find('div', attrs={'id' : 'bookDesc_iframe'})
+print aa
+
+res = urllib2.urlopen(aa).read()
+# print res
+
+soup = BeautifulSoup(res, 'html.parser')
+s = soup.find('div', attrs = {'centerCol'})
+
 print s
-# s = soup.find('div', attrs={'id' : 'leftCol'})
 selector = etree.HTML(str(s))
-xpath = '//*[@id="iframeContent"]/text()[1]'
-aa = selector.xpath(xpath)
-# print aa[0]
-
+xpath = '//*[@id="productTitle"]/text()'
+# aa = selector.xpath(xpath)[0]
+# print aa
 
